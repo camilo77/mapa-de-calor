@@ -152,6 +152,11 @@ const Badges = Loadable({
   loading: Loading,
 });
 
+const Maps = Loadable({
+  loader: () => import('./views/Maps'),
+  loading: Loading,
+});
+
 const Modals = Loadable({
   loader: () => import('./views/Notifications/Modals'),
   loading: Loading,
@@ -187,6 +192,7 @@ const User = Loadable({
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/', exact: true, name: 'Home', component: DefaultLayout },
+  { path: '/maps', exact: true, name: 'Maps', component: Maps },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/theme', exact: true, name: 'Theme', component: Colors },
   { path: '/theme/colors', name: 'Colors', component: Colors },
