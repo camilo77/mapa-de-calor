@@ -27,7 +27,8 @@ class Maps extends Component {
       markers: undefined,
       selectedMarkersMock: 1,
       serviceSelected: "1",
-      yearSelected: "2018"
+      yearSelected: "2018",
+      loading: false
     };
   }
 
@@ -82,14 +83,17 @@ class Maps extends Component {
     }
     // calling endpoint
     try {
+      this.setState({ loading: true})
       const response = await request(options);
       console.log("response", response)
       this.setMarkers(response) // set markers
+      this.setState({ loading: false})
     }
     catch (error) {
       console.log(error);
       //this.setMarkers(mockPositions) // delete this line
       console.log("set markers")
+      this.setState({ loading: false})
     }
   }
 
@@ -130,7 +134,7 @@ class Maps extends Component {
                 </Row>
                 <Row center="xs">
                   <Col xs="6">
-                    <ReactLoading type={"bars"} color={"#009688"} height={'10%'}  />
+                    { this.state.loading ? <ReactLoading type={"bars"} color={"#009688"} height={'10%'}/> : <div></div> }
                   </Col>
                 </Row>
               </CardBody>
