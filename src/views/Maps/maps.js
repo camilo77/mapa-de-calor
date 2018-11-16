@@ -28,7 +28,8 @@ class Maps extends Component {
       selectedMarkersMock: 1,
       serviceSelected: "1",
       yearSelected: "2018",
-      loading: false
+      loading: false,
+      message: ''
     };
   }
 
@@ -87,13 +88,13 @@ class Maps extends Component {
       const response = await request(options);
       console.log("response", response)
       this.setMarkers(response) // set markers
-      this.setState({ loading: false})
+      this.setState({ loading: false, message: 'Datos cargados con éxito'})
     }
     catch (error) {
       console.log(error);
       //this.setMarkers(mockPositions) // delete this line
       console.log("set markers")
-      this.setState({ loading: false})
+      this.setState({ loading: false, message: 'Error al cargar los datos'})
     }
   }
 
@@ -132,9 +133,9 @@ class Maps extends Component {
                     </FormGroup>
                   </Col>
                 </Row>
-                <Row center="xs">
-                  <Col xs="6">
-                    { this.state.loading ? <ReactLoading type={"bars"} color={"#009688"} height={'10%'}/> : <div></div> }
+                <Row>
+                  <Col align='center'>
+                    { this.state.loading ? <ReactLoading type={"bars"} color={"#009688"} height={'10%'}/> : <Label>{this.state.message}</Label> }
                   </Col>
                 </Row>
               </CardBody>
