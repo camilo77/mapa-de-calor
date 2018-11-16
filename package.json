@@ -36,10 +36,13 @@
     "react-google-map": "^3.1.1",
     "react-google-maps-loader": "^4.2.3",
     "react-loadable": "^5.5.0",
+    "react-loading": "^2.0.3",
     "react-router-config": "^4.4.0-beta.1",
     "react-router-dom": "^4.3.1",
     "react-test-renderer": "^16.5.2",
     "reactstrap": "^6.5.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
     "simple-line-icons": "^2.4.1"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import request from 'request-promise'
 import {
   Card,
   CardBody,
@@ -10,7 +11,8 @@ import {
   Input,
 } from 'reactstrap';
 import GoogleMapReact from 'google-map-react';
-import Marker from './marker.js'
+import Marker from './marker.js';
+import ReactLoading from 'react-loading';
 
 
 class Maps extends Component {
@@ -19,6 +21,7 @@ class Maps extends Component {
 
     this.onChangeService = this.onChangeService.bind(this);
     this.onChangeYear = this.onChangeYear.bind(this);
+    this.setMarkers = this.setMarkers.bind(this);
 
     this.state = {
       markers: undefined,
@@ -29,17 +32,18 @@ class Maps extends Component {
   }
 
   componentDidMount() {
-    this.setMarkers(mockPositions)
+    this.routeEndPoint()
   }
 
   setMarkers( posiciones ){
+    console.log(posiciones)
     const markers = posiciones.map( element => {
       return (
         <Marker
           lat={element.latitud}
           lng={element.longitud}
-          pqrs={`# PQRS: ${element.pqrs}`}
-          centroPoblado={`${element.centroPoblado}`}
+          pqrs={`# PQRS: ${element.numero_pqrs}`}
+          centroPoblado={`${element.centro_poblado}`}
         />
       )
     })
@@ -56,26 +60,39 @@ class Maps extends Component {
 
   onChangeService(event) {
     this.setState( {serviceSelected: event.target.value}, this.routeEndPoint )
-    if ( this.state.selectedMarkers == 1) {
-      this.setMarkers(mockPositions)
-      this.setState({selectedMarkers: 2})
-    } else {
-      this.setMarkers(mockPositions2)
-      this.setState({selectedMarkers: 1})
-    }
   }
 
   onChangeYear(event) {
     this.setState( { yearSelected: event.target.value }, this.routeEndPoint )
   }
 
-  routeEndPoint() {
+  async routeEndPoint() {
+    //define the endpint to call
+    var uri = undefined
     if ( this.state.serviceSelected == "1" ) {
-      alert(`call endpoint -- /pqr/${this.state.yearSelected}`)
+      uri = `http://172.16.44.9:5000/pqr/${this.state.yearSelected}`
     } else {
-      alert(`call endpoint -- /pqr/${services[this.state.serviceSelected].service}/${this.state.yearSelected}`)
+      uri = `http://172.16.44.9:5000/pqr/${services[this.state.serviceSelected].service}/${this.state.yearSelected}`
+    }
+    //setting options
+    var options = {
+      method: 'GET',
+      uri: uri,
+      json: true
+    }
+    // calling endpoint
+    try {
+      const response = await request(options);
+      console.log("response", response)
+      this.setMarkers(response) // set markers
+    }
+    catch (error) {
+      console.log(error);
+      //this.setMarkers(mockPositions) // delete this line
+      console.log("set markers")
     }
   }
+
   render() {
 
     return (
@@ -111,6 +128,11 @@ class Maps extends Component {
                     </FormGroup>
                   </Col>
                 </Row>
+                <Row center="xs">
+                  <Col xs="6">
+                    <ReactLoading type={"bars"} color={"#009688"} height={'10%'}  />
+                  </Col>
+                </Row>
               </CardBody>
             </Card>
           </Col>
@@ -144,44 +166,44 @@ const services = {
 }
 const mockPositions = [
     {
-        centroPoblado: "RAMIRIQUI",
-        pqrs: 6,
+        "centro_poblado": "RAMIRIQUI",
+        "numero_pqrs": 6,
         latitud: 5.40022164431,
         longitud: -73.33486896309999
     },
     {
-        centroPoblado: "SAN JOSE",
-        pqrs: 1,
+        "centro_poblado": "SAN JOSE",
+        "numero_pqrs": 1,
         latitud: 5.08156947455,
         longitud: -75.79200443750001
     },
     {
-        centroPoblado: "GUACHENE",
-        pqrs: 1,
+        "centro_poblado": "GUACHENE",
+        "numero_pqrs": 1,
         latitud: 3.13415329544,
         longitud: -76.3921887379
     },
     {
-        centroPoblado: "INZA",
-        pqrs: 1,
+        "centro_poblado": "INZA",
+        "numero_pqrs": 1,
         latitud: 2.5491829843100002,
         longitud: -76.0635027215
     },
     {
-        centroPoblado: "VILLA RICA",
-        pqrs: 4,
+        "centro_poblado": "VILLA RICA",
+        "numero_pqrs": 4,
         latitud: 3.17757792648,
         longitud: -76.457872658
     },
     {
-        centroPoblado: "CAQUEZA",
-        pqrs: 5,
+        "centro_poblado": "CAQUEZA",
+        "numero_pqrs": 5,
         latitud: 4.40410105992,
         longitud: -73.946474203
     },
     {
-        centroPoblado: "CHIPAQUE",
-        pqrs: 2,
+        "centro_poblado": "CHIPAQUE",
+        "numero_pqrs": 2,
         latitud: 4.44267101655,
         longitud: -74.04487563090001
     }
@@ -189,44 +211,44 @@ const mockPositions = [
 
 const mockPositions2 = [
     {
-        centroPoblado: "MEDELLIN",
-        pqrs: 2685,
+        "centro_poblado": "MEDELLIN",
+        "numero_pqrs": 2685,
         latitud: 6.24960557194,
         longitud: -75.57736775660001
     },
     {
-        centroPoblado: "MONTEBELLO",
-        pqrs: 1,
+        "centro_poblado": "MONTEBELLO",
+        "numero_pqrs": 1,
         latitud: 5.94632556697,
         longitud: -75.5235109116
     },
     {
-        centroPoblado: "YARUMALITO",
-        pqrs: 1,
+        "centro_poblado": "YARUMALITO",
+        "numero_pqrs": 1,
         latitud: 5.95015928602,
         longitud: -75.57743194480001
     },
     {
-        centroPoblado: "YOLOMBO",
-        pqrs: 5,
+        "centro_poblado": "YOLOMBO",
+        "numero_pqrs": 5,
         latitud: 6.59459243359,
         longitud: -75.0133505772
     },
     {
-        centroPoblado: "CARTAGENA DE INDIAS, DISTRITO TURISTICO, HISTORICO Y CULTURAL",
-        pqrs: 229,
+        "centro_poblado": "CARTAGENA DE INDIAS, DISTRITO TURISTICO, HISTORICO Y CULTURAL",
+        "numero_pqrs": 229,
         latitud: 10.384985522600001,
         longitud: -75.49643102799999
     },
     {
-        centroPoblado: "PAZ DE RIO",
-        pqrs: 6,
+        "centro_poblado": "PAZ DE RIO",
+        "numero_pqrs": 6,
         latitud: 5.987644905790001,
         longitud: -72.74913738309999
     },
     {
-        centroPoblado: "PUERTO BOYACA",
-        pqrs: 4,
+        "centro_poblado": "PUERTO BOYACA",
+        "numero_pqrs": 4,
         latitud: 5.97793495174,
         longitud: -74.5879991859
     }
