@@ -13,6 +13,7 @@ import {
 import GoogleMapReact from 'google-map-react';
 import Marker from './marker.js';
 import ReactLoading from 'react-loading';
+import moment from 'moment';
 
 
 class Maps extends Component {
@@ -21,20 +22,59 @@ class Maps extends Component {
 
     this.onChangeService = this.onChangeService.bind(this);
     this.onChangeYear = this.onChangeYear.bind(this);
+    this.onChangeMonth = this.onChangeMonth.bind(this);
     this.setMarkers = this.setMarkers.bind(this);
+    this.setMonths = this.setMonths.bind(this);
 
     this.state = {
       markers: undefined,
       selectedMarkersMock: 1,
       serviceSelected: "1",
       yearSelected: "2018",
+      monthSelected: "0",
       loading: false,
-      message: ''
+      message: '',
+      monthsAvaliables: undefined,
     };
   }
 
   componentDidMount() {
+    this.setMonths()
     this.routeEndPoint()
+  }
+
+  setMonths(){
+    console.log("months updated")
+    const today = new Date()
+    const todayYear = today.getFullYear()
+    // show 12 months
+    // si el año seleccionado no es el año actual
+    if ( this.state.yearSelected < todayYear ) {
+      console.log("year menor")
+      var monthsAvaliables = [ <option value={0}>Todos</option> ]
+      // mostrar todos los meses
+      for ( var i = 1; i <= 12; i++) {
+        monthsAvaliables.push( this.createMonth(i, months[i-1].month) )
+      }
+      this.setState({monthsAvaliables: monthsAvaliables})
+    } // si el año seleccionado es el año actual
+    else {
+      const yearMonths = today.getMonth()+1
+      // si el mes seleccionado es mayor a la cantidad de meses del año seleccionado
+      if ( this.state.monthSelected > yearMonths ) {
+        this.setState( {monthSelected: '0'} ) // seleccionar todos los meses
+      }
+      // mostrar todos los meses del año en curso
+      var monthsAvaliables = [ <option value={0}>Todos</option> ]
+      for ( var i = 1; i <=  yearMonths - 1 ; i++) {
+        monthsAvaliables.push( this.createMonth(i, months[i-1].month) )
+      }
+      this.setState({monthsAvaliables: monthsAvaliables})
+    }
+  }
+
+  createMonth(index, name){
+    return (<option value={index}>{name}</option>)
   }
 
   setMarkers( posiciones ){
@@ -65,17 +105,50 @@ class Maps extends Component {
   }
 
   onChangeYear(event) {
-    this.setState( { yearSelected: event.target.value }, this.routeEndPoint )
+    const today = new Date()
+    const todayYear = today.getFullYear()
+    const todayMonth = today.getMonth()
+    if( todayMonth < this.state.monthSelected ){
+      this.setState( { yearSelected: event.target.value, monthSelected: '0' }, () => {
+        this.setMonths()
+        this.routeEndPoint()
+      })
+    } else {
+      this.setState( { yearSelected: event.target.value }, () => {
+        this.setMonths()
+        this.routeEndPoint()
+      })
+    }
+
+  }
+
+  onChangeMonth(event) {
+    this.setState( { monthSelected: event.target.value }, this.routeEndPoint )
   }
 
   async routeEndPoint() {
     //define the endpint to call
+    console.log()
     var uri = undefined
+    // si quiere ver todos los servicios
     if ( this.state.serviceSelected == "1" ) {
-      uri = `http://172.16.44.9:5000/pqr/${this.state.yearSelected}`
+      console.log("Month", this.state.monthSelected)
+      // si quiere ver todos los meses
+      if ( this.state.monthSelected == "0" )
+        uri = `http://172.16.44.9:5000/pqr/${this.state.yearSelected}`
+      else { // si quiere ver un mes especifico
+        uri = `http://172.16.44.9:5000/pqr/${this.state.yearSelected}/${this.state.monthSelected}`
+      }
     } else {
-      uri = `http://172.16.44.9:5000/pqr/${services[this.state.serviceSelected].service}/${this.state.yearSelected}`
+      console.log("Month", this.state.monthSelected)
+      // si quiere ver todos los meses
+      if ( this.state.monthSelected == "0" )
+        uri = `http://172.16.44.9:5000/pqr/${services[this.state.serviceSelected].service}/${this.state.yearSelected}`
+      else
+        uri = `http://172.16.44.9:5000/pqr/${services[this.state.serviceSelected].service}/${this.state.yearSelected}/${this.state.monthSelected}`
+
     }
+    console.log("llamando url", uri)
     //setting options
     var options = {
       method: 'GET',
@@ -111,7 +184,7 @@ class Maps extends Component {
               </CardHeader>
               <CardBody>
                 <Row>
-                  <Col xs="6">
+                  <Col xs="4">
                     <FormGroup>
                       <Label htmlFor="service-name">Servicios</Label>
                       <Input type="select" name="service-name" id="service-name" onChange={this.onChangeService}>
@@ -122,13 +195,21 @@ class Maps extends Component {
                       </Input>
                     </FormGroup>
                   </Col>
-                  <Col xs="6">
+                  <Col xs="4">
                     <FormGroup>
                       <Label htmlFor="year">Año</Label>
                       <Input type="select" name="year" id="year" onChange={this.onChangeYear}>
                         <option value="2018">2018</option>
                         <option value="2017">2017</option>
                         <option value="2016">2016</option>
+                      </Input>
+                    </FormGroup>
+                  </Col>
+                  <Col xs="4">
+                    <FormGroup>
+                      <Label htmlFor="month">Mes</Label>
+                      <Input type="select" name="month" id="month" onChange={this.onChangeMonth}>
+                        {this.state.monthsAvaliables}
                       </Input>
                     </FormGroup>
                   </Col>
@@ -169,6 +250,21 @@ const services = {
     service: "glp"
   }
 }
+
+const months = [
+  { key: 1, month: 'Enero' },
+  { key: 2, month: 'Febrero' },
+  { key: 3, month: 'Marzo' },
+  { key: 4, month: 'Abril' },
+  { key: 5, month: 'Mayo' },
+  { key: 6, month: 'Junio' },
+  { key: 7, month: 'Julio' },
+  { key: 8, month: 'Agosto' },
+  { key: 9, month: 'Septiembre' },
+  { key: 10, month: 'Octubre' },
+  { key: 11, month: 'Noviembre' },
+  { key: 12, month: 'Diciembre' }
+]
 const mockPositions = [
     {
         "centro_poblado": "RAMIRIQUI",
