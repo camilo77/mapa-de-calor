@@ -27,6 +27,7 @@
     "google-map-react": "^1.0.9",
     "hint.css": "^2.5.0",
     "html-hint": "^0.2.4",
+    "moment": "^2.22.2",
     "node-sass": "^4.9.4",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
